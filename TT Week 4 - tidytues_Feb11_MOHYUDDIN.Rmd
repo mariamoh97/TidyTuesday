@@ -1,0 +1,98 @@
+---
+title: "#TidyTuesday"
+subtitle: "Week 4"
+author: "Maria Mohyuddin"
+css: custom_report.css
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+    toc_depth: 1
+    code_folding: show
+    theme: default
+    highlight: tango
+    fig_captions: no
+    number_sections: false
+---
+
+<!-- This is a comment in markdown. 
+
+The top section is the YAML metadata. 
+
+Below are code chunks interspersed with markdown prose.
+
+-->
+
+
+```{r setup, include=FALSE, warning = FALSE, message = FALSE}
+  knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+  options(scipen=999) # turns off scientific notation
+
+# load packages
+  library(tidyverse)
+  library(tidytuesdayR)   
+
+# load data
+  
+heritage <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-02-06/heritage.csv')
+
+  
+
+  
+```
+
+
+# Exploration
+```{r Pivot longer}
+heritage2 <- heritage %>%
+  pivot_longer(!country, names_to = "year", 
+              values_to = "total_sites")
+heritage2
+```
+
+
+```{r Creating a donut chart to illustrate proportion of heritage sites in 2022}
+
+
+# load library
+library(ggplot2)
+ 
+# Create test data.
+data <-  data.frame(
+  category=c("Norway", "Denmark", "Sweden"),
+  count=c(8, 10, 15)
+)
+
+# Compute percentages i.e., individual count/sum
+data$fraction = data$count / sum(data$count) 
+
+# Compute cumulative percentages 
+data$ymax = cumsum(data$fraction)
+
+data$ymin = c(0, head(data$ymax, n=-1))
+ 
+# Make the plot
+         
+ ggplot(data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=category,)) +
+     geom_rect() +
+     coord_polar(theta="y")+ xlim(c(2, 4)) + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + scale_fill_manual(values=c("darkred", "darkblue", "darkgreen")) + ggtitle("Proportion of UNESCO Heritage Sites in 2022 across 3 Nordic Countries")
+ 
+ # struggling to add the year in the empty circle inside
+ 
+```
+
+
+```{r}
+#Comparing heritage sites for all three countries in a flipped (horizontal) bar chart 
+
+# load library
+library(ggplot2) 
+
+#Make the plot
+
+p <- ggplot(heritage2, aes(x =country, y =total_sites, fill=year))+ geom_bar(width=0.5,stat="identity", color="black") + labs(y= "Total Sites",x="")+  scale_fill_manual(values=c("darkred", "black"))  + ggtitle("Comparing UNESCO Heritage Sites Across 3 Nordic Countries")
+
+# Flip plot to a horizontal bar chart
+p + coord_flip()
+```
+
