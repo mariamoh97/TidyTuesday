@@ -1,0 +1,199 @@
+---
+title: "#TidyTuesday"
+subtitle: "Week 4"
+author: "Maria Mohyuddi"
+css: custom_report.css
+output: 
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+    toc_depth: 1
+    code_folding: show
+    theme: default
+    highlight: tango
+    fig_captions: no
+    number_sections: false
+---
+
+<!-- This is a comment in markdown. 
+
+The top section is the YAML metadata. 
+
+Below are code chunks interspersed with markdown prose.
+
+-->
+
+
+```{r setup, include=FALSE, warning = FALSE, message = FALSE}
+  knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+  options(scipen=999) # turns off scientific notation
+  
+#install packages
+
+
+# load packages
+  library(tidyverse)
+  library(tidytuesdayR)   # install.packages("tidytuesdayR") to get new data
+ 
+
+# load data
+  
+  tuesdata <- tidytuesdayR::tt_load('2024-01-30')
+  groundhogs <- tuesdata$groundhogs
+  predictions <- tuesdata$predictions
+
+  
+# clean data (optional: tidy tuesday provides clean data)
+  
+```
+
+
+
+# Exploration
+```{r}
+View(groundhogs)
+View(predictions)
+
+# Filtering for 2023 data, identifying groundhogs that predicted 6 more weeks of winter and creating a distinction between actual groundhogs and other types
+
+plot_data <- filter(predictions,year==2023) %>% select(id,shadow)  %>%
+       left_join(groundhogs,by = "id") %>% select(id,is_groundhog,shadow) %>%  mutate(shadow=case_when(shadow ~"Longer winter", TRUE ~"Early spring")) %>% mutate(is_groundhog=case_when(is_groundhog ~ "Groundhog", TRUE ~"Not a groundhog")) %>% filter(shadow=="Longer winter")%>% group_by(is_groundhog)
+
+plot_data
+
+```
+
+
+```{r}
+ # Contrasting winter predictions between actual groundhogs and other types through a bar graph
+
+ggplot(data=plot_data, aes(x=is_groundhog,y=shadow, fill=is_groundhog)) + geom_bar(width=0.5,stat="identity", show.legend = FALSE)+theme(
+    axis.text.y =  element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.ticks.x = element_blank()) + labs(y= "Longer winter prediction",x="")
+
+#The bar graph shows us that more non-groundhogs gave winter predictions that did actual groundhogs
+
+```
+ 
+
+`
+
+
+```{r}
+ ## Find and run
+# | Name |  |
+# |:--   |:--      |
+# | Author | Thamali Vidanage |
+# | Tweet | [url](https://twitter.com/thamali_v/status/1753671456284684669) |
+# | Code | [url](https://github.com/ThamaliV/Groundhog-Day/blob/main/tt5.Rmd) |
+
+library(tidyverse)
+library(janitor)
+library(tidytuesdayR)
+library(here)
+library(dplyr)
+library(ggplot2)
+library(sysfonts)
+library(showtext)
+```
+
+
+```{r}
+font_add_google("Alegreya Sans", "aleg")
+font_add_google("Oswald", "oswald")
+font_add_google("PT Sans Narrow", "pt")
+showtext_auto()
+
+```
+
+
+```{r}
+groundhogs <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-01-30/groundhogs.csv')
+predictions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-01-30/predictions.csv')
+
+```
+
+```{r}
+merged_data <- merge(groundhogs,predictions,by="id")
+
+merged_data
+```
+
+```{r}
+
+filtered_data <-merged_data%>% 
+                filter(country== "Canada")%>%
+                group_by(region)
+filtered_data
+```
+
+
+
+
+```{r}
+
+filterdf <- predictions %>% filter(id %in% c(14)) %>% filter(year> 2016)
+
+filterdf
+```
+
+```{r}
+
+#plot_a <- plot(filterdf$year, as.numeric(filterdf$shadow), type = "l", col = "blue", xlab = "Year", ylab = "prediction", main = "Time Series Plot of Logical Data")
+
+#plot_a
+
+```
+
+```{r}
+#plot_1<- barplot(table(filterdf$shadow), col = c("blue", "red"), beside = TRUE, legend.text = TRUE, xlab = "Year", ylab = "Frequency", main = "Bar Plot of Logical Data by Year")
+
+#plot_1
+```
+
+
+```{r}
+a1 <- as.numeric(filterdf$shadow) 
+a1
+```
+
+```{r}
+plot_aa<- filterdf%>%
+  ggplot(aes(x=year,y = as.factor(filterdf$shadow),fill= shadow))+
+  geom_jitter(stat = "identity",position = "dodge")+
+  #facet_wrap(~year)+
+  scale_fill_manual(name = "Prediction", values = c("TRUE" = "blue", "FALSE" = "red")) +
+  labs(x = "Year", y = "Shadow", fill = "Prediction")
+  
+plot_aa
+```
+
+```{r}
+plot_aa <- ggplot(filterdf, aes(x = year, y = as.factor(shadow), color = factor(shadow))) +
+  geom_jitter(position=position_jitter(0), shape= 17, size= 4, stat = "identity") + 
+
+  #scale_shape_manual(values = c(16,17))+
+  #scale_color_manual(values = c("#00AFBB", "#E7B800"))+# Adjust position if needed
+  #scale_fill_manual(name = "Prediction", values = c("TRUE" = "blue", "FALSE" = "red")) +  # Specify colors for TRUE and FALSE
+  labs(x = "Year", y = "Shadow", fill = "Prediction")  # Labels for axes and legend
+
+print(plot_aa)
+```
+```{r}
+plot_b <- ggplot(filterdf, aes(x = year, y = as.factor(shadow), color = factor(shadow))) +
+  geom_point (size = 19) +  # Adjust position if needed
+  scale_fill_manual(name = "Prediction", values = c("TRUE" = "blue", "FALSE" = "red")) +  # Specify colors for TRUE and FALSE
+  labs(x = "Year", y = "Shadow", fill = "Prediction")  # Labels for axes and legend
+
+print(plot_aa)
+
+```
+
+``
+
+## Notes
+
+*What did you learn from their approach?*
+I learned how to merge data through a simple line of code. I used a more complicated process after multiple google searches and her method seems more straightforward and intuitive. The code is also divided into clean chunks which makes it easier to read. The author also made use of geom_jitter a couple of times which adds randomn variation to the location of points and is a good way to handle overplotting caused by discreteness in smaller datasets.
+
